@@ -9,6 +9,7 @@ There's lots of Wemos D1 mini cases on thingiverse
 
 Its based on a Wemos D1 mini (esp8266) and 2 MPU6050 sensors. Electronics cost less than $15.
 The only others parts needed are a couple of 20mm bolts, the 3d printed parts, some wire and plugs and a boom.
+Much of the code is based on https://github.com/adesandr/MAD_Single
 It connects to your Wifi using the Autoconnect library by Hieromon Ikasamo https://github.com/Hieromon/AutoConnect , allowing you to enter you wifi credentials then displays the sensor info as a web page on your smart phone.
 Each sensor/magnet weighs about 6 grams and my version of the incidence gauge with the sensor attached is about 50 grams.
 Both sensors connect as follows
