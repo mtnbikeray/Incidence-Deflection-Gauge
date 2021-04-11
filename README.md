@@ -16,7 +16,7 @@ It needs to be powered through a micro usb plug.
 After about a minute you should see “esp8266ap” as an available network on your smart phone.
 Connect to it and it should present you with a login screen
 If it asks for a password use 12345678
-You should see an autoconnect login screen,  Select the three horizntal bars (hamberger menu?)
+You should see an autoconnect login screen,  Select the three horizntal bars (hamburger menu?)
 and select Configure New AP.  Select you network and enter your credentials and you should be presented with a information screen showing the current IP address
 of the Wemos Mini
 this only needs to be done once.
