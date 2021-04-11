@@ -4,8 +4,8 @@ I started making an incidence gauge but found I could add a second sensor and be
 It seems to be accurate to within 0.1 degree. The sensors attach to the control surface with a magnet.
 Simply attaching one of the sensors to the incidence gauge allows you to see wing or horiz stab incidence.
 The incidence gauge was a remix of https://www.thingiverse.com/thing:1730475 to make it fit an old heli boom I had laying around.
-The sensor brackets are a remix of https://www.thingiverse.com/thing:2911596
-There's lots of Wemos D1 mini cases on tningiverse
+The sensor brackets are a remix of https://www.thingiverse.com/thing:2911596 with a small rare earth magnet epoxied to the top.  another magnet under the control surface will hold things in place
+There's lots of Wemos D1 mini cases on thingiverse
 
 Its based on a Wemos D1 mini (esp8266) and 2 MPU6050 sensors. Electronics cost less than $15.
 The only others parts needed are a couple of 20mm bolts, the 3d printed parts, some wire and plugs and a boom.
