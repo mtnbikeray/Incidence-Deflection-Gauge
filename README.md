@@ -26,9 +26,9 @@ Connect to it and it should present you with a login screen
 If it asks for a password use 12345678
 You should see an autoconnect login screen,  Select the three horizntal bars (hamburger menu?)
 and select Configure New AP.  Select you network and enter your credentials and you should be presented with a information screen showing the current IP address
-of the Wemos Mini
-this only needs to be done once.
-restartng the device will connect to the same network.
+of the Wemos Mini.
+This only needs to be done once.
+Restartng the device will connect to the same network.
 If you have trouble finding the device, look at all devices connected to you router,
 
 This current version needs a parameter to set the chord value.
