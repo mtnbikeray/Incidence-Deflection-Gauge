@@ -14,7 +14,7 @@
   It will help you understand AutoConnect usage.
 */
 
-//  Production  4/11/21
+//  TEST 4/30/21
 
 #if defined(ARDUINO_ARCH_ESP8266)
 #include <ESP8266WiFi.h>
@@ -161,12 +161,12 @@ page += String(F("<p><a class=\"button\" href=\"/io?v=low\">Zero Sensors</a></p>
 page += String(F("<font size=\"+3\">"));
 page += String(F("<br><br> Chord &nbsp;&nbsp;" ));page += String(chordControlSurface);page += String(F("<br><br>"));
 page += String(F("<table class=\"center\"><thead><tr><th> </th><th>Sensor 1</th><th>Sensor 2</th></tr></thead>"));
-page += String(F("<tbody><tr><td>"));page += String(F("X Ang (deg)</td><td> <span style=\"font-weight:bold;color:Tomato\">"));page += String(a1fz, 1);page += String(F("</span></td><td>")); 
-page += String(a2fz, 1);page += String(F("</td>"));page += String(F("</tr>"));
+page += String(F("<tbody><tr><td>"));page += String(F("X Ang (deg)</td><td> <span style=\"font-weight:bold;color:Tomato\">"));page += String(a1f, 1);page += String(F("</span></td><td>")); 
+page += String(a2f, 1);page += String(F("</td>"));page += String(F("</tr>"));
 page += String(F("<tr><td>"));page += String(F("Trav (mm) </td><td>  <span style=\"font-weight:bold;color:Tomato\">"));page += String(t1fz, 1);page += String(F("</span></td><td>")); 
 page += String(t2fz, 1);page += String(F("</td>"));page += String(F("</tr>"));
-page += String(F("<tr><td>"));page += String(F("Y Ang (deg)</td><td>  <span style=\"font-weight:bold;color:Tomato\">"));page += String(y1fz, 1);page += String(F("</span></td><td>")); 
-page += String(y2fz, 1);page += String(F("</td>"));page += String(F("</tr>"));
+page += String(F("<tr><td>"));page += String(F("Y Ang (deg)</td><td>  <span style=\"font-weight:bold;color:Tomato\">"));page += String(Y1f, 1);page += String(F("</span></td><td>")); 
+page += String(Y2f, 1);page += String(F("</td>"));page += String(F("</tr>"));
 page += String(F("</tbody></table>"));
 page += String(F("</font>"));
 page += String(F("</body></html>"));
@@ -178,10 +178,15 @@ portal.host().send(200, "text/html", page);
 void handleGPIO() {
 WebServerClass& server = portal.host();
 
-angle1_zero = a1f;
-angle2_zero = a2f;
+angle1_zero = angle;
+angle2_zero = angle2;
+y1_zero = angleY;
+y2_zero = angle2Y;
+
+/*
 y1_zero = Y1f;
 y2_zero = Y2f;
+*/
 travel1_zero = t1f;
 travel2_zero = t2f;
 
@@ -307,8 +312,8 @@ Wire.endTransmission(true);
     accelgyro2.setXGyroOffset(336);
     accelgyro2.setYGyroOffset(-59);
     accelgyro2.setZGyroOffset(14);
-
-*/    
+*/
+  
 
     accelgyro.setXAccelOffset(0);
     accelgyro.setYAccelOffset(0);
@@ -369,6 +374,8 @@ Wire.endTransmission(true);
   accelgyro2.setXGyroOffset(gx_offset);
   accelgyro2.setYGyroOffset(gy_offset);
   accelgyro2.setZGyroOffset(gz_offset);
+
+
 /* 
   Serial.print("x: ");
   Serial.println(ax_offset);
@@ -551,7 +558,7 @@ if (mpu == MPU_addr) {
 
     /*--- Compute Control surface travel using : 2* sin(angle/2)* chord. Angle for sinus function needs  ---*/
     /*--- to be converted in radian (angleDegre = angleRadian *(2*PI)/360)                             ---*/ 
-    travel = chordControlSurface * sin((angle*(2.0*PI)/360.0)/2.0) * 2.0;
+ /*   travel = chordControlSurface * sin((angle*(2.0*PI)/360.0)/2.0) * 2.0;       */
     }
 else {
     angle2=0.98*(angle2+float(gy)*0.01/131) + 0.02*atan2((double)ax,(double)az)*180/PI;
@@ -559,7 +566,7 @@ else {
 
     /*--- Compute Control surface travel using : 2* sin(angle/2)* chord. Angle for sinus function needs  ---*/
     /*--- to be converted in radian (angleDegre = angleRadian *(2*PI)/360)                             ---*/ 
-    travel2 = chordControlSurface * sin((angle2*(2.0*PI)/360.0)/2.0) * 2.0;
+ /*   travel2 = chordControlSurface * sin((angle2*(2.0*PI)/360.0)/2.0) * 2.0;*/
     }
 
 
@@ -592,12 +599,12 @@ else {
  *******************************************************/
 void manageDisplay(){
 
-  int angle_aff = abs(angle * 10);
+  int angle_aff = abs((angle-angle1_zero) * 10);
   int travel_aff = abs(travel * 10);
-  int angle_aff2 = abs(angle2 * 10);
+  int angle_aff2 = abs((angle2-angle2_zero) * 10);
   int travel_aff2 = abs(travel2 * 10);
-  int angleY_aff = abs(angleY * 10);
-  int angle2Y_aff = abs(angle2Y * 10);
+  int angleY_aff = abs((angleY-y1_zero) * 10);
+  int angle2Y_aff = abs((angle2Y-y2_zero) * 10);
 
 
   if((millis() - t1) > DELAY_DISPLAY)
@@ -664,18 +671,18 @@ void manageDisplay(){
  t1fz = fabs(fabs(t1f) - fabs(travel1_zero));
  t2fz = fabs(fabs(t2f) - fabs(travel2_zero));
 
-    /*--- Compute Control surface travel using : 2* sin(angle/2)* chord. Angle for sinus function needs  ---*/
+    /*--- Compute Control surface travel using : 2* sin(angle/2)* chord. Angle for sin function needs  ---*/
     /*--- to be converted in radian (angleDegre = angleRadian *(2*PI)/360)                             ---*/ 
-    t1fz = chordControlSurface * sin((a1fz*(2.0*PI)/360.0)/2.0) * 2.0;
-    t2fz = chordControlSurface * sin((a2fz*(2.0*PI)/360.0)/2.0) * 2.0;
- /*
-  Serial.print(a1f);
+    t1fz = chordControlSurface * sin((a1f*(2.0*PI)/360.0)/2.0) * 2.0;
+    t2fz = chordControlSurface * sin((a2f*(2.0*PI)/360.0)/2.0) * 2.0;
+ 
+  Serial.print(angle);
   Serial.print(" ");
-  Serial.print(a2f);
+  Serial.print(angle2);
   Serial.print(" ");
-  Serial.print(t1f);
+  Serial.print(travel);
   Serial.print(" ");
-  Serial.println(t2f);
+  Serial.println(travel2);
   Serial.print(angle1_zero);
   Serial.print(" ");
   Serial.print(angle2_zero);
@@ -690,7 +697,7 @@ void manageDisplay(){
   Serial.print(t1fz);
   Serial.print(" ");
   Serial.println(t2fz);
-  */
+ 
   digitalWrite(LED, HIGH);// turn the LED on.(Note that LOW is the voltage level but actually 
  }
    
