@@ -79,7 +79,7 @@ int giro_deadzone=1;     //Giro error allowed, make it lower to get more precisi
 
 boolean set_gyro_angles;
 boolean set_gyro_angles2;
-char auth[] = "Wb_SkBADPkMDa-LlbxPp5TENWtabzKYx";
+char auth[] = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
 
 #include <AutoConnect.h>
 
