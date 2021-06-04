@@ -1,5 +1,5 @@
 # Incidence-Deflection-Gauge
-RC incidence &amp; deflection gauge
+RC incidence &amp; deflection gauge.  Similar to Gliderthrow a commercial product.
 I started making an incidence gauge but found I could add a second sensor and be able to measure deflection of ailerons, flaps, rudder.
 It seems to be accurate to within 0.1 degree. The sensors attach to the control surface with a magnet.
 Simply attaching one of the sensors to the incidence gauge allows you to see wing or horiz stab incidence.
