@@ -25,16 +25,16 @@ After about a minute you should see “esp8266ap” as an available network on y
 Connect to it and it should present you with a login screen
 If it asks for a password use 12345678
 You should see an autoconnect login screen,  Select the three horizntal bars (hamburger menu?)
-and select Configure New AP.  Select you network and enter your credentials and you should be presented with a information screen showing the current IP address
-of the Wemos Mini.
+and select Configure New AP.  Select your network and enter your credentials and you should be presented with a information screen showing the current IP address
+of the Wemos Mini.  Make note of this address to be used to connect to the gauge.  It should be something like 192.168.1.xx
 This only needs to be done once.
 Restartng the device will connect to the same network.
-If you have trouble finding the device, look at all devices connected to you router,
+If you have trouble finding the device, look at all devices connected to your router,
 
 This current version needs a parameter to set the chord value.
 in your browser. when you connect to the sensor use the following format
 
-192.168.1.1/?c=nn       where nn is the chord size of the control surface in millimeters
+192.168.1.xx/?c=nn       where nn is the chord size of the control surface in millimeters and 192.168.1.xx is the address given when you entered your network credentials  
 
 When the device initializes it will calibrate itself and this can take about 2 minutes...during this time the BLUE led will be solid.  Leave the sensors on a flat surface during this.
 Once the BLUE led starts flashing it is ready for a connection.
