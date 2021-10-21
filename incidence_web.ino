@@ -15,6 +15,7 @@
 */
 
 //  TEST 4/30/21
+// Modified by Bearded Flyer 18 Oct 2021
 
 #if defined(ARDUINO_ARCH_ESP8266)
 #include <ESP8266WiFi.h>
@@ -42,6 +43,7 @@ const int MPU_addr=0x68;
 //set ADO to high (3.3v) for 0x69
 const int MPU_addr2=0x69;
 
+
 int16_t AcX,AcY,AcZ,Tmp,GyX,GyY,GyZ;
 //int16_t AcX,AcY,AcZ,Tmp,GyX,GyY,GyZ;
 
@@ -63,6 +65,7 @@ float a1f,a2f,t1f,t2f,a1fz,a2fz,t1fz,t2fz;
 float Y1f,Y2f,y1fz,y2fz;
 float angle1_zero=0.0,angle2_zero=0.0,travel1_zero=0.0,travel2_zero=0.0,y1_zero=0.0,y2_zero=0.0;
 float Da1f,Da2f,Dt1f,Dt2f;
+float elapsed_time,newtime,timeprev;          // Timers for angle measurment
 long t1 = 0;                              // Timer for Display management
 long t2 = 0;                              // Timer for measure
 
@@ -75,7 +78,6 @@ int ax_offset,ay_offset,az_offset,gx_offset,gy_offset,gz_offset;
 int buffersize=1000;     //Amount of readings used to average, make it higher to get more precision but sketch will be slower  (default:1000)
 int acel_deadzone=8;     //Acelerometer error allowed, make it lower to get more precision, but sketch may not converge  (default:8)
 int giro_deadzone=1;     //Giro error allowed, make it lower to get more precision, but sketch may not converge  (default:1)
-
 
 boolean set_gyro_angles;
 boolean set_gyro_angles2;
@@ -174,7 +176,6 @@ page += String(F("</body></html>"));
 portal.host().send(200, "text/html", page);
 }
 
-
 void handleGPIO() {
 WebServerClass& server = portal.host();
 
@@ -257,15 +258,7 @@ void setup() {
     server.on("/readXValue", handleXValue);
     server.on("/specificArgs", readChord);
 
-/*
-  server.on("/get", HTTP_GET, [] (AsyncWebServerRequest *request) {
-    String inputMessage;
-    // GET inputString value on <ESP_IP>/get?inputString=<inputMessage>
-    if (request->hasParam(PARAM_INT)) {
-      inputMessage = request->getParam(PARAM_INT)->value();
-      chordControlSurface = inputMessage.c_str();
-    }}
- */   
+
     if (MDNS.begin("esp8266")) {
     Serial.println("MDNS started.");
 
@@ -283,8 +276,7 @@ void setup() {
   }
 
  //accelgyro.initialize();
-//  Serial.println(accelgyro.testConnection() ? F("MPU6050 connection success") : F("MPU6050 connection fail")); 
-//  delay(1000); 
+
 
   Wire.begin();
 
@@ -294,27 +286,7 @@ Wire.write(0);
 Wire.endTransmission(true);
 
 
-
-/*
-// orig   Ray
-    accelgyro.setXAccelOffset(-5503);
-    accelgyro.setYAccelOffset(2);
-    accelgyro.setZAccelOffset(1049);
-
-    accelgyro.setXGyroOffset(-43);
-    accelgyro.setYGyroOffset(-62);
-    accelgyro.setZGyroOffset(34);
-   
-    accelgyro2.setXAccelOffset(-1531);
-    accelgyro2.setYAccelOffset(-32);
-    accelgyro2.setZAccelOffset(1347);
-
-    accelgyro2.setXGyroOffset(336);
-    accelgyro2.setYGyroOffset(-59);
-    accelgyro2.setZGyroOffset(14);
-*/
   
-
     accelgyro.setXAccelOffset(0);
     accelgyro.setYAccelOffset(0);
     accelgyro.setZAccelOffset(0);
@@ -327,8 +299,8 @@ Wire.endTransmission(true);
   delay(1000);
   calibration(MPU_addr);
   delay(1000);
-  meansensors(MPU_addr);
-  delay(10000);
+//  meansensors(MPU_addr);
+//  delay(10000);
   accelgyro.setXAccelOffset(ax_offset);
   accelgyro.setYAccelOffset(ay_offset);
   accelgyro.setZAccelOffset(az_offset);
@@ -366,8 +338,8 @@ Wire.endTransmission(true);
   delay(1000);
   calibration(MPU_addr2);
   delay(1000);
-  meansensors(MPU_addr2);
-  delay(10000);
+//  meansensors(MPU_addr2);
+//  delay(10000);
   accelgyro2.setXAccelOffset(ax_offset);
   accelgyro2.setYAccelOffset(ay_offset);
   accelgyro2.setZAccelOffset(az_offset);
@@ -376,21 +348,6 @@ Wire.endTransmission(true);
   accelgyro2.setZGyroOffset(gz_offset);
 
 
-/* 
-  Serial.print("x: ");
-  Serial.println(ax_offset);
-    Serial.print("y: ");
-  Serial.println(ay_offset);
-    Serial.print("z: ");
-  Serial.println(az_offset);
-    Serial.print("gx: ");
-  Serial.println(gx_offset);
-    Serial.print("gy: ");
-  Serial.println(gy_offset);
-    Serial.print("gz: ");
-  Serial.println(gz_offset);
- 
-*/
 // ---------------------------------
 
 
@@ -422,23 +379,8 @@ Tmp=Wire.read()<<8|Wire.read();
 gx=Wire.read()<<8|Wire.read();
 gy=Wire.read()<<8|Wire.read();
 gz=Wire.read()<<8|Wire.read();
-/*
-Serial.print(mpu);
-Serial.print(" x: " );
-  Serial.print(ax);
-    Serial.print(" y: ");
-  Serial.print( ay);
-    Serial.print(" z: ");
-  Serial.print(az);
-    Serial.print(" gx: ");
-  Serial.print(gx);
-    Serial.print(" gy: ");
-  Serial.print(gy);
-    Serial.print(" gz: ");
-  Serial.println(gz);
-*/
-    
 
+    
     if (i>100 && i<=(buffersize+100)){ //First 100 measures are discarded
       buff_ax=buff_ax+ax;
       buff_ay=buff_ay+ay;
@@ -528,15 +470,17 @@ void calibration(int mpu){
  * MPU6050 measurement
  *******************************************************/
 void manageMeasure(int mpu){
-
-
-    
+  
     /*--- Compute Y angle in degre. Complementary filter is used to combine accelero and gyro datas       ---*/
     /*--- see  http://www.pieter-jan.com/node/11 for more information regarding the complementary filter  ---*/
     /*--- or https://delta-iot.com/la-theorie-du-filtre-complementaire/ (in french)                       ---*/
     /*--- Basically complementary filter avoid used of kallman filter, quiet difficult to implement in    ---*/
     /*--- arduino platform. Gyro are used for fast motion as accelero are used for slow motion.           ---*/                                 
  //   accelgyro.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
+ timeprev = newtime;  // the previous time is stored as the time read
+ newtime = millis(); // actual time read
+ elapsed_time = (newtime - timeprev) / 1000; // elapsed time in seconds
+ 
  Wire.beginTransmission(mpu);
 Wire.write(0x3B);
 Wire.endTransmission(true);
@@ -553,16 +497,16 @@ gx=Wire.read()<<8|Wire.read();
 gy=Wire.read()<<8|Wire.read();
 gz=Wire.read()<<8|Wire.read();
 if (mpu == MPU_addr) {
-    angle=0.98*(angle+float(gy)*0.01/131) + 0.02*atan2((double)ax,(double)az)*180/PI;
-    angleY=0.98*(angleY+float(gx)*0.01/131) + 0.02*atan2((double)ay,(double)az)*180/PI;
+    angle=0.98*(angle+float(gy)*elapsed_time/131) + 0.02*atan2((double)ax,(double)az)*180/PI;
+    angleY=0.98*(angleY+float(gx)*elapsed_time/131) + 0.02*atan2((double)ay,(double)az)*180/PI;
 
     /*--- Compute Control surface travel using : 2* sin(angle/2)* chord. Angle for sinus function needs  ---*/
     /*--- to be converted in radian (angleDegre = angleRadian *(2*PI)/360)                             ---*/ 
  /*   travel = chordControlSurface * sin((angle*(2.0*PI)/360.0)/2.0) * 2.0;       */
     }
 else {
-    angle2=0.98*(angle2+float(gy)*0.01/131) + 0.02*atan2((double)ax,(double)az)*180/PI;
-    angle2Y=0.98*(angle2Y+float(gx)*0.01/131) + 0.02*atan2((double)ay,(double)az)*180/PI;
+    angle2=0.98*(angle2+float(gy)*elapsed_time/131) + 0.02*atan2((double)ax,(double)az)*180/PI;
+    angle2Y=0.98*(angle2Y+float(gx)*elapsed_time/131) + 0.02*atan2((double)ay,(double)az)*180/PI;
 
     /*--- Compute Control surface travel using : 2* sin(angle/2)* chord. Angle for sinus function needs  ---*/
     /*--- to be converted in radian (angleDegre = angleRadian *(2*PI)/360)                             ---*/ 
@@ -570,25 +514,6 @@ else {
     }
 
 
- /* Serial.print("x: ");
-  Serial.println(ax);
-    Serial.print("y: ");
-  Serial.println(ay);
-    Serial.print("z: ");
-  Serial.println(az);
-    Serial.print("gx: ");
-  Serial.println(gx);
-    Serial.print("gy: ");
-  Serial.println(gy);
-    Serial.print("gz: ");
-  Serial.println(gz);
-      Serial.print("tra: ");
-  Serial.println(travel);
-    Serial.print("ang: ");
-  Serial.println(angle);
- */
-  
-  
   
 } /* End manageMeasure */
 
@@ -599,51 +524,28 @@ else {
  *******************************************************/
 void manageDisplay(){
 
-  int angle_aff = abs((angle-angle1_zero) * 10);
-  int travel_aff = abs(travel * 10);
-  int angle_aff2 = abs((angle2-angle2_zero) * 10);
-  int travel_aff2 = abs(travel2 * 10);
-  int angleY_aff = abs((angleY-y1_zero) * 10);
-  int angle2Y_aff = abs((angle2Y-y2_zero) * 10);
+//  int angle_aff = abs((angle-angle1_zero) * 10);
+//  int travel_aff = abs(travel * 10);
+//  int angle_aff2 = abs((angle2-angle2_zero) * 10);
+//  int travel_aff2 = abs(travel2 * 10);
+//  int angleY_aff = abs((angleY-y1_zero) * 10);
+//  int angle2Y_aff = abs((angle2Y-y2_zero) * 10);
 
+  int angle_aff = ((angle-angle1_zero) * 10);
+  int travel_aff = (travel * 10);
+  int angle_aff2 = ((angle2-angle2_zero) * 10);
+  int travel_aff2 = (travel2 * 10);
+  int angleY_aff = ((angleY-y1_zero) * 10);
+  int angle2Y_aff = ((angle2Y-y2_zero) * 10);
 
+  
   if((millis() - t1) > DELAY_DISPLAY)
   {
         digitalWrite(LED, LOW);// turn the LED on.(Note that LOW is the voltage level but actually 
 
   t1 = millis();
 
- /*  
-  Serial.print("Chord: ");
-  Serial.println(chordControlSurface);
-  Serial.print("Angle: ");
-  Serial.print(angle_aff/10);
-  Serial.print(".");
-  Serial.print(angle_aff%10);
-  Serial.print("  ");
-  Serial.print(angle_aff2/10);
-  Serial.print(".");
-  Serial.print(angle_aff2%10);
-  Serial.print("  ");
-  Serial.print(angleY_aff/10);
-  Serial.print(".");
-  Serial.print(angleY_aff%10);
-  Serial.print("  ");
-  Serial.print(angle2Y_aff/10);
-  Serial.print(".");
-  Serial.println(angle2Y_aff%10);
-
-
-
-  Serial.print("Travel: ");
-  Serial.print(travel_aff/10);
-  Serial.print(".");
-  Serial.print(travel_aff%10);
-  Serial.print("  ");
-  Serial.print(travel_aff2/10);
-  Serial.print(".");
-  Serial.println(travel_aff2%10);
-*/  
+ 
 //  int i = 1234567890;
 //float f = (i % 1000) / 1000.0f;
 //f += i / 1000;
@@ -710,7 +612,9 @@ server.handleClient();
   if(millis() - t2 > DELAY_MEASURE)
   {
     t2 = millis();
+    newtime = millis();
     manageMeasure(MPU_addr2);
+    newtime = millis();
     manageMeasure(MPU_addr);
   }
   
