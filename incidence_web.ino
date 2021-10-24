@@ -18,7 +18,9 @@
 // Modified by Bearded Flyer 18 Oct 2021
 
 #if defined(ARDUINO_ARCH_ESP8266)
+//#include <Adafruit_CC3000.h>
 #include <ESP8266WiFi.h>
+//#include <CC3000_MDNS.h>
 #include <ESP8266mDNS.h>
 #include <ESP8266WebServer.h>
 #elif defined(ARDUINO_ARCH_ESP32)
@@ -259,10 +261,10 @@ void setup() {
     server.on("/specificArgs", readChord);
 
 
-    if (MDNS.begin("esp8266")) {
+    if (MDNS.begin("throws")) {
     Serial.println("MDNS started.");
 
-      MDNS.addService("http", "tcp", 80);
+     MDNS.addService("http", "tcp", 80);
     }
     else {
     Serial.println("MDNS failed.");
@@ -608,7 +610,7 @@ void manageDisplay(){
 void loop() {
 WebServerClass& server = portal.host();
 server.handleClient();
-  
+MDNS.update();  
   if(millis() - t2 > DELAY_MEASURE)
   {
     t2 = millis();
