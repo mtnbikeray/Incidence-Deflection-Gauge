@@ -34,7 +34,9 @@ If you have trouble finding the device, look at all devices connected to your ro
 This current version needs a parameter to set the chord value.
 in your browser. when you connect to the sensor use the following format
 
-192.168.1.xx/?c=nn       where nn is the chord size of the control surface in millimeters and 192.168.1.xx is the address given when you entered your network credentials  
+192.168.1.xx/?c=nn       where nn is the chord size of the control surface in millimeters and 192.168.1.xx is the address given when you entered your network credentials
+IOS users can now use the following in place of the ip address
+throws.local/?c=nn
 
 When the device initializes it will calibrate itself and this can take about 2 minutes...during this time the BLUE led will be solid.  Leave the sensors on a flat surface during this.
 Once the BLUE led starts flashing it is ready for a connection.
