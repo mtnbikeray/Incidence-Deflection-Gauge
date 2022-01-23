@@ -385,6 +385,11 @@ Wire.endTransmission(true);
     Serial.print("gz: ");
   Serial.println(gz_offset);
 
+Wire.beginTransmission(MPU_addr2);
+Wire.write(0x6B);
+Wire.write(0);
+Wire.endTransmission(true);
+
   
   // if nvm (non volatile memory) was uninitialized update it w current values
 
